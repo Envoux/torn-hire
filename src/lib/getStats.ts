@@ -1,5 +1,13 @@
 export const getStats = async (apiKey: string) => {
 	try {
+		const lastUpdate = localStorage.getItem(`stats-lastUpdate`);
+
+		if (lastUpdate && Date.now() - new Date(lastUpdate).getTime() < 3 * 60 * 60 * 1000) {
+			const cachedStats = localStorage.getItem(`stats`);
+			if (cachedStats) {
+				return JSON.parse(cachedStats);
+			}
+		}
 		const meritsResponse = await fetch(
 			`https://api.torn.com/user/?selections=merits&key=${apiKey}`
 		);
@@ -16,6 +24,9 @@ export const getStats = async (apiKey: string) => {
 			int: workStatsData['intelligence'] || 0,
 			end: workStatsData['endurance'] || 0
 		};
+
+		localStorage.setItem(`stats`, JSON.stringify(stats));
+		localStorage.setItem(`stats-lastUpdate`, new Date().toISOString());
 
 		return stats;
 	} catch (error) {

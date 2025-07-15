@@ -5,8 +5,9 @@
 	interface Props {
 		text: string;
 		children?: Snippet<[]>;
+		textClassName?: string;
 	}
-	let { text, children }: Props = $props();
+	let { text, children, textClassName }: Props = $props();
 </script>
 
 <span class="tooltip relative">
@@ -16,7 +17,7 @@
 		<MdiHelpCircle />
 	{/if}
 	<span
-		class="tooltip-text invisible absolute z-10 w-30 rounded-md bg-[#808080] p-1 text-center text-[1rem] text-white"
+		class="tooltip-text invisible absolute z-10 w-30 rounded-md bg-[#808080] p-1 text-center text-[1rem] text-white {textClassName}"
 	>
 		<p>{text}</p>
 	</span>

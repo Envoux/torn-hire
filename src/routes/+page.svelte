@@ -116,7 +116,13 @@
 		copyToClipboard(messageBody);
 	};
 
-	const openExternalLink = (link: string) => window.open(link, '_blank');
+	const openExternalLink = (link: string, redirect = true) => {
+		const handle = window.open(link, '_blank', !redirect ? 'noopener,noreferrer' : '');
+		if (!redirect) {
+			window.blur();
+			window.focus();
+		}
+	};
 
 	const search = async () => {
 		if (apiKey === '') {
@@ -124,6 +130,7 @@
 			return;
 		}
 
+		// TODO: update periodically to avoid spamming the API
 		const statsResponse = await getStats(apiKey);
 		if (statsResponse) {
 			stats = statsResponse;
@@ -153,7 +160,7 @@
 
 <div class="flex h-full w-full flex-col">
 	<div class="my-container flex flex-row items-center justify-between">
-		<h1 class="mr-4 text-2xl font-semibold">TornHire</h1>
+		<h1 class="mr-4 text-2xl font-semibold">TornJobs</h1>
 		<span class="flex flex-row justify-center">
 			Your API key(<Tooltip text="generate api key"
 				><span
@@ -174,8 +181,15 @@
 		<a class=" text-zinc-700" href="https://www.torn.com/profiles.php?XID=3718662">by Termained</a>
 	</div>
 
-	<fieldset class="my-container flex flex-row flex-wrap gap-x-4">
+	<fieldset class="my-container flex flex-row flex-wrap items-center gap-x-4">
 		<legend>Config</legend>
+		<div class="flex flex-row items-center">
+			<span class="shine mr-1 text-lg font-medium">Tutorial</span>
+			<Tooltip
+				textClassName="w-75"
+				text={`To use the app, start by setting the type of company you want to check in the config - everything else is optional and up to you. You can then prepare your message to the directors; once you copy the body, your stats will automatically be filled in. At the bottom of the app, you'll find a list of companies. When you mark one as "mailed", it'll move to the bottom of the list - out of your way for now, but easy to come back to later :)`}
+			/>
+		</div>
 		<div>
 			Company type: <select bind:value={query.companyType}>
 				{#each companiesIds as company}
@@ -201,6 +215,7 @@
 			/><MdiStar class="inline-block" />
 		</div>
 		<div>Has empty slots: <input type="checkbox" bind:checked={query.hasEmptySlots} /></div>
+
 		<div class="mt-2 flex w-full flex-row items-center gap-2">
 			<Button className="text-xl" props={{ type: 'button', onclick: search }}>Search</Button>
 			<!-- <Tooltip text="every time you change company" /> -->
@@ -332,13 +347,38 @@
 					</div>
 
 					<p>Daily income: {company.dailyIncome.toLocaleString()}$</p>
-
+					<!-- <Button
+						className="mt-2"
+						props={{
+							type: 'button',
+							onclick: () => {
+								openExternalLink(
+									`https://www.torn.com/joblist.php#/p=corpinfo&ID=${company.id}`,
+									false
+								);
+							}
+						}}>Apply</Button
+					> -->
 					<a
 						class="mr-4 font-semibold hover:cursor-pointer hover:underline"
+						onclick={(e) => {
+							e.preventDefault();
+							openExternalLink(
+								`https://www.torn.com/joblist.php#/p=corpinfo&ID=${company.id}`,
+								false
+							);
+						}}
 						href={`https://www.torn.com/joblist.php#/p=corpinfo&ID=${company.id}`}>Apply</a
 					>
 					<a
 						class="mr-4 font-semibold hover:cursor-pointer hover:underline"
+						onclick={(e) => {
+							e.preventDefault();
+							openExternalLink(
+								`https://www.torn.com/joblist.php#/p=corpinfo&ID=${company.id}`,
+								false
+							);
+						}}
 						href={`https://www.torn.com/messages.php#/p=compose&XID=${company.owner}`}>Mail</a
 					>
 					<Button
@@ -380,5 +420,27 @@
 	}
 	input[type='number'] {
 		width: 4rem;
+	}
+	@keyframes shine {
+		0% {
+			background-position: -100%;
+		}
+		100% {
+			background-position: 100%;
+		}
+	}
+	.shine {
+		animation: shine 1.75s linear infinite;
+		background: linear-gradient(
+			120deg,
+			rgba(255, 255, 255, 0) 30%,
+			rgba(255, 255, 255, 0.85) 50%,
+			rgba(255, 255, 255, 0) 70%
+		);
+		background-size: 200%;
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		text-shadow: 0 0 01px white;
 	}
 </style>
